@@ -32,9 +32,9 @@ SuggestedTopicSerializer.class_eval do
   def first_post_details
     {
       post_id: object&.first_post&.id,
-      # bookmark_id: bookmark_id_for_first_post,
-      is_post_liked: true,
-      is_post_bookmarked: true
+      bookmark_id: bookmark_id_for_first_post,
+      is_post_liked: is_post_liked?,
+      is_post_bookmarked: is_post_bookmarked?
     }
   end
 
