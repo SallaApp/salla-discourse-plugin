@@ -1,0 +1,4 @@
+plugins:
+  salla_serializers_enabled:
+    default: true
+    client: true
