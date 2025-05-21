@@ -67,6 +67,3 @@ The plugin can be enabled or disabled via site settings:
 
 ## Authors
 - Ahsan Afzal
-
-## License
-Specify your license here. 
