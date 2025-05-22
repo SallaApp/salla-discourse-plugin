@@ -30,4 +30,7 @@ after_initialize do
 
   require_relative "lib/salla_serializers/middleware_patch"
   ContentSecurityPolicy::Middleware.prepend SallaSerializers::MiddlewarePatch
+
+  require_relative "lib/salla_serializers/email_interceptor"
+  ActionMailer::Base.register_interceptor(SallaSerializers::EmailInterceptor)
 end
