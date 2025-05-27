@@ -56,6 +56,9 @@ The plugin can be enabled or disabled via site settings:
 ### API Response Filtering
 - Non-admin API responses will have sensitive user fields (`admin`, `moderator`, `trust_level`, and the `users` key) removed for privacy.
 
+### Session Cookie Patch
+- Added Domain in session cookies
+
 ## Development
 
 - Main plugin logic is in `plugin.rb`.
