@@ -33,4 +33,7 @@ after_initialize do
 
   require_relative "lib/salla_serializers/email_interceptor"
   ActionMailer::Base.register_interceptor(SallaSerializers::EmailInterceptor)
+
+  require_relative "lib/salla_serializers/auth_cookie_patch"
+  ::Auth::DefaultCurrentUserProvider.prepend SallaSerializers::AuthCookiePatch
 end
