@@ -38,7 +38,4 @@ after_initialize do
 
   require_relative "lib/salla_serializers/auth_cookie_patch"
   ::Auth::DefaultCurrentUserProvider.prepend SallaSerializers::AuthCookiePatch
-
-  require_relative "lib/salla_serializers/application_controller_patch"
-  ::ApplicationController.prepend SallaSerializers::ApplicationControllerPatch
 end
