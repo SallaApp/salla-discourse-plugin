@@ -17,6 +17,8 @@ after_initialize do
     require_relative "app/serializers/#{file}"
   end
 
+  register_asset "app/views/user_notifications/digest.html.erb", :email
+
   require_relative "app/controllers/topics_controller.rb"
   load File.expand_path("app/config/routes.rb", __dir__)
 
@@ -36,4 +38,7 @@ after_initialize do
 
   require_relative "lib/salla_serializers/auth_cookie_patch"
   ::Auth::DefaultCurrentUserProvider.prepend SallaSerializers::AuthCookiePatch
+
+  require_relative "lib/salla_serializers/application_controller_patch"
+  ::ApplicationController.prepend SallaSerializers::ApplicationControllerPatch
 end
