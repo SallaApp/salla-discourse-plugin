@@ -17,6 +17,15 @@ after_initialize do
     require_relative "app/serializers/#{file}"
   end
 
+  Rails.application.config.session_store(
+    :discourse_cookie_store,
+    key: "_forum_session",
+    path: (Rails.application.config.relative_url_root || "/"),
+    domain: ENV["COOKIE_DOMAIN"] # 👈 set your desired domain here
+  )
+
+  register_asset "app/views/user_notifications/digest.html.erb", :email
+
   require_relative "app/controllers/topics_controller.rb"
   load File.expand_path("app/config/routes.rb", __dir__)
 

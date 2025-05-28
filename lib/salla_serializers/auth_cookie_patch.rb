@@ -21,7 +21,7 @@ module SallaSerializers
         httponly: true,
         secure: SiteSetting.force_https,
         expires: expires,
-        domain: ENV["COOKIE_DOMAIN"],
+        domain: ENV["COOKIE_DOMAIN"] || Discourse.current_hostname,
         same_site: same_site,
       }
     end
