@@ -2,6 +2,8 @@
 
 module SallaSerializers
   class EmailInterceptor
+    ASSET_EXTENSIONS = %w[jpg jpeg png gif svg webp css js ico mp4 mp3 woff woff2 ttf otf].freeze
+
     def self.delivering_email(message)
       if message.html_part
         html = message.html_part.body.decoded
@@ -32,9 +34,19 @@ module SallaSerializers
       from_url = ENV["REWRITE_FROM_URL"]&.chomp("/")
       to_url = ENV["REWRITE_TO_URL"]&.chomp("/")
 
-      if from_url.present? && to_url.present?
-        content = content.gsub(%r{#{Regexp.escape(from_url)}/?}, "#{to_url}/")
+      return content unless from_url.present? && to_url.present?
+
+      asset_pattern = /\.(#{ASSET_EXTENSIONS.join('|')})(\?.*)?(?=["'])/
+
+      content = content.gsub(%r{#{Regexp.escape(from_url)}(?![^"'\s>]*#{asset_pattern})}) do |match|
+        to_url
       end
+
+      content = content.gsub(%r{(?<!#{Regexp.escape(from_url)})/t/([^\s"'<>]+)(?![^"'\s>]*#{asset_pattern})}) do
+        "/detail/#{$1}"
+      end
+
+      content
     end
   end
 end
