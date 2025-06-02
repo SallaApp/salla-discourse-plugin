@@ -46,11 +46,10 @@ module SallaSerializers
         "/detail/#{$1}"
       end
 
-      content = content.gsub(%r{(/detail/[^/\s"'<>]+/\d+)(?:/[^/"'\s<>]+)*(?=[?"#'\s>]|$)}) do
-        $1
+      # Remove extra path segments after the ID in detail URLs and trailing slash
+      content = content.gsub(%r{(/detail/[^/\s"'<>]+/\d+)(?:/[^/"'\s<>]+)*|(/detail/[^/\s"'<>]+/\d+)/+(?=[?"#'\s>]|$)}) do
+        $1 || $2
       end
-
-      content = content.gsub(%r{(/detail/[^/\s"'<>]+/\d+)/+(?=[?"#'\s>]|$)}, '\1')
 
       content
     end
