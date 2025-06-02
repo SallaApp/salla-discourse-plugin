@@ -46,6 +46,12 @@ module SallaSerializers
         "/detail/#{$1}"
       end
 
+      content = content.gsub(%r{(/detail/[^/\s"'<>]+/\d+)(?:/[^/"'\s<>]+)*(?=[?"#'\s>]|$)}) do
+        $1
+      end
+
+      content = content.gsub(%r{(/detail/[^/\s"'<>]+/\d+)/+(?=[?"#'\s>]|$)}, '\1')
+
       content
     end
   end
