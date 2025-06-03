@@ -10,7 +10,7 @@ TopicListItemSerializer.class_eval do
       id: category_id,
       name: object.category&.name,
       only_admin_can_post: object.category&.groups&.exists?(name: "admins"),
-      emoji: "https://community.salla.com/forum/#{category_id}.png"
+      emoji: Discourse.base_url_no_prefix + object.category&.uploaded_logo&.url.to_s
     }
   end
 
