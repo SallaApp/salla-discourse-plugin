@@ -46,6 +46,11 @@ module SallaSerializers
         "/detail/#{$1}"
       end
 
+      # Rewrite full user profile URLs like https://community.salla.com/u/{username}
+      content = content.gsub(%r{(https?://[^"'<>]+?)/u/([a-zA-Z0-9_\-]+)}) do
+        "#{$1}/profile?username=#{$2}"
+      end
+
       # Remove extra path segments after the ID in detail URLs and trailing slash
       content = content.gsub(%r{(/detail/[^/\s"'<>]+/\d+)(?:/[^/"'\s<>]+)*|(/detail/[^/\s"'<>]+/\d+)/+(?=[?"#'\s>]|$)}) do
         $1 || $2
