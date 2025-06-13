@@ -38,19 +38,15 @@ module SallaSerializers
 
       asset_pattern = /\.(#{ASSET_EXTENSIONS.join('|')})(\?.*)?(?=["'])/
 
-      content = content.gsub(%r{(https?://[^\s"'<>]+)}) do |url|
+      content = content.gsub(%r{(#{Regexp.escape(from_url)}[^\s"'<>]*)}) do |url|
         # Skip URLs containing /email/unsubscribe/
         next url if url.include?('/email/unsubscribe/')
 
         # Skip if it's an asset URL
         next url if url.match?(asset_pattern)
 
-        # Replace from_url with to_url if the URL starts with from_url
-        if url.start_with?(from_url)
-          url.sub(from_url, to_url)
-        else
-          url
-        end
+        # Replace from_url with to_url
+        url.sub(from_url, to_url)
       end
 
       content = content.gsub(%r{(?<!#{Regexp.escape(from_url)})/t/([^\s"'<>]+)(?![^"'\s>]*#{asset_pattern})}) do
