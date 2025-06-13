@@ -18,6 +18,7 @@ after_initialize do
   end
 
   require_relative "app/controllers/topics_controller.rb"
+  require_relative "app/controllers/public_users_controller.rb"
   load File.expand_path("app/config/routes.rb", __dir__)
 
   require_relative "lib/salla_serializers/controller_extensions"
