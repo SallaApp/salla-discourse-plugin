@@ -6,18 +6,21 @@ module SallaSerializers
             page = params[:page].to_i > 0 ? params[:page].to_i : 1
             per_page = params[:per_page].to_i > 0 ? params[:per_page].to_i : 20
             users = User.all
-            paginated = users.select(:id, :username, :name).offset((page - 1) * per_page).limit(per_page)
+            total_count = users.count
+            paginated = users.select(:id, :username, :updated_at).offset((page - 1) * per_page).limit(per_page)
             render json: {
-              users_list: paginated.map { |u| u.as_json(only: [:id, :username, :name]) },
+              users_list: paginated.map { |u| u.as_json(only: [:id, :username, :updated_at]) },
               meta: {
                 page: page,
                 per_page: per_page,
-                total_count: users.count,
-                total_pages: (users.count / per_page.to_f).ceil
+                total_count: total_count,
+                total_pages: (total_count / per_page.to_f).ceil
               }
             }
         rescue => e
-            render json: { error: e.message, backtrace: e.backtrace }, status: 500
+            Rails.logger.error("Error: #{e.message}")
+            Rails.logger.error("Backtrace: #{e.backtrace.join("\n")}")
+            render json: { error: "An unexpected error occurred. Please try again later." }, status: 500
         end
     end
 end
