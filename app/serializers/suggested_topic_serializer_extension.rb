@@ -16,7 +16,7 @@ SuggestedTopicSerializer.class_eval do
       name: object.category&.name,
       topic_title: object.title,
       only_admin_can_post: object.category&.groups&.exists?(name: "admins"),
-      emoji: "https://community.salla.com/forum/#{object.category.id}.png"
+      emoji: object.category&.id ? "https://community.salla.com/forum/#{object.category.id}.png" : nil
     }
   end
 
