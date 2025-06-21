@@ -17,6 +17,14 @@ after_initialize do
     require_relative "app/serializers/#{file}"
   end
 
+  if ENV['SENTRY_DSN'].present?
+    Sentry.init do |config|
+      config.dsn = ENV['SENTRY_DSN']
+      config.environment = ENV['SENTRY_ENV'] || 'staging'
+    end
+  end
+
+
   require_relative "app/controllers/topics_controller.rb"
   load File.expand_path("app/config/routes.rb", __dir__)
 
