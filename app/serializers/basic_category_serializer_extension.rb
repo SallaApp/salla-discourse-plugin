@@ -5,7 +5,11 @@ BasicCategorySerializer.class_eval do
             :emoji
 
   def emoji
-    Discourse.base_url_no_prefix + object.uploaded_logo&.url.to_s
+    if object.uploaded_logo
+      Discourse.base_url_no_prefix + object.uploaded_logo.url.to_s
+    else
+      nil
+    end
   end
 
   def only_admin_can_post

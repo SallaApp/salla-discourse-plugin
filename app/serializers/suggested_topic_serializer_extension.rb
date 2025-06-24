@@ -16,7 +16,7 @@ SuggestedTopicSerializer.class_eval do
       name: object.category&.name,
       topic_title: object.title,
       only_admin_can_post: object.category&.groups&.exists?(name: "admins"),
-      emoji: Discourse.base_url_no_prefix + object.category&.uploaded_logo&.url.to_s
+      emoji: object.category&.uploaded_logo&.url ? Discourse.base_url_no_prefix + object.category.uploaded_logo.url.to_s : nil
     }
   end
 
