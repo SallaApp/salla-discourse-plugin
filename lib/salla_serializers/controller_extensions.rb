@@ -12,7 +12,8 @@ module SallaSerializers
 		def append_defaults_in_custom_fields
 			begin
 				json = JSON.parse(response.body, symbolize_names: true)
-			rescue JSON::ParserError
+			rescue JSON::ParserError => e
+				Rails.logger.error("Failed to parse JSON response body: #{e.message}")
 				return
 			end
 
