@@ -10,7 +10,11 @@ module SallaSerializers
     private
 
 		def append_defaults_in_custom_fields
-			json = JSON.parse(response.body, symbolize_names: true) rescue return
+			begin
+				json = JSON.parse(response.body, symbolize_names: true)
+			rescue JSON::ParserError
+				return
+			end
 
 			if json.dig(:category_list, :categories)
 				json[:category_list][:categories] = process_categories(json[:category_list][:categories])
