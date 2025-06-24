@@ -16,7 +16,7 @@ PostSerializer.class_eval do
 			name: topic.category.name,
 			only_admin_can_post: topic.category.groups.exists?(name: "admins"),
 			topic_title: object.topic.title,
-      emoji: topic.category_id ? "https://community.salla.com/forum/#{topic.category_id}.png" : nil
+      emoji: Discourse.base_url_no_prefix + topic.category&.uploaded_logo&.url.to_s
 		}
 	end
 
