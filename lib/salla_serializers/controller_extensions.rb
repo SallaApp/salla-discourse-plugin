@@ -4,6 +4,7 @@ module SallaSerializers
   module ControllerExtensions
     def self.included(base)
       base.after_action :remove_users_from_response
+      base.before_action :set_sentry_context
     end
 
     private
@@ -36,6 +37,19 @@ module SallaSerializers
 
 		def admin_referer?
 			request.referer&.match?(%r{/forum/admin(/.*)?$})
+		end
+
+		def set_sentry_context
+			if current_user
+				Sentry.set_user(
+					id: current_user.id,
+					username: current_user.username,
+					email: current_user.email,
+					ip_address: request.remote_ip
+				)
+			end
+		rescue => e
+			Rails.logger.error("Failed to set Sentry context: #{e.message}\n#{e.backtrace.join("\n")}")
 		end
   end
 end
