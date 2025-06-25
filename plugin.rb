@@ -62,4 +62,10 @@ after_initialize do
 
   require_relative "lib/salla_serializers/auth_cookie_patch"
   ::Auth::DefaultCurrentUserProvider.prepend SallaSerializers::AuthCookiePatch
+
+  # Add the Discourse Reactions controller patch
+  require_relative "lib/salla_serializers/discourse_reactions_controller_patch"
+  if defined?(DiscourseReactions::CustomReactionsController)
+    DiscourseReactions::CustomReactionsController.prepend SallaSerializers::DiscourseReactionsControllerPatch
+  end
 end
