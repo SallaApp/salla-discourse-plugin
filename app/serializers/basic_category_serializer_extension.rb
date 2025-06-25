@@ -2,7 +2,7 @@
 
 BasicCategorySerializer.class_eval do
   attributes :only_admin_can_post,
-            :emoji
+             :emoji
 
   def emoji
     if object.uploaded_logo
