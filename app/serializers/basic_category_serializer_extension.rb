@@ -5,7 +5,11 @@ BasicCategorySerializer.class_eval do
             :emoji
 
   def emoji
-    "https://community.salla.com/forum/#{object.id}.png"
+    if object.uploaded_logo
+      Discourse.base_url_no_prefix + object.uploaded_logo.url.to_s
+    else
+      nil
+    end
   end
 
   def only_admin_can_post
