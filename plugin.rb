@@ -5,7 +5,15 @@
 # version: 1.0
 # authors: Ahsan Afzal
 
+gem "sentry-ruby", "5.11.0"
+gem "sentry-rails", "5.11.0"
+
 enabled_site_setting :salla_serializers_enabled
+
+require 'sentry-ruby'
+require 'sentry-rails'
+
+# Initialize Sentry early if DSN is present
 
 after_initialize do
   %w[
@@ -18,7 +26,7 @@ after_initialize do
   end
 
   if ENV['SENTRY_DSN'].present?
-    Sentry.init do |config|
+    ::Sentry.init do |config|
       config.dsn = ENV['SENTRY_DSN']
       config.environment = ENV['SENTRY_ENV'] || 'staging'
       
