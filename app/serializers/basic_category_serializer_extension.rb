@@ -1,18 +1,13 @@
 # frozen_string_literal: true
 
-BasicCategorySerializer.class_eval do
-  attributes :only_admin_can_post,
-             :emoji
+CategoryDetailedSerializer.class_eval do
+  attributes :can_post
 
-  def emoji
-    if object.uploaded_logo
-      Discourse.base_url_no_prefix + object.uploaded_logo.url.to_s
-    else
-      nil
-    end
-  end
+  def can_post
+    return false unless scope.user
 
-  def only_admin_can_post
-    object.groups.exists?(name: "admins")
+    # Use Discourse's built-in category permission system
+    Guardian.new(scope.user).can_create_topic_on_category?(object)
+
   end
 end
