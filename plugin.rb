@@ -25,6 +25,8 @@ after_initialize do
     require_relative "app/serializers/#{file}"
   end
 
+  require_relative "lib/topic_query_patch"
+
   if ENV['SENTRY_DSN'].present?
     ::Sentry.init do |config|
       config.dsn = ENV['SENTRY_DSN']
