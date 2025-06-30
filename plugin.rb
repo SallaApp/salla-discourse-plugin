@@ -68,4 +68,7 @@ after_initialize do
   if defined?(DiscourseReactions::CustomReactionsController)
     DiscourseReactions::CustomReactionsController.prepend SallaSerializers::DiscourseReactionsControllerPatch
   end
+
+  require_relative "lib/salla_serializers/omniauth_callbacks_controller_patch"
+  ::Users::OmniauthCallbacksController.prepend SallaSerializers::OmniauthCallbacksControllerPatch
 end
