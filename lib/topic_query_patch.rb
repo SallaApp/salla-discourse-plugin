@@ -58,11 +58,9 @@ end
 
 module TopicQueryClassPatch
   PG_MAX_INT = 2_147_483_647
-  DEFAULT_PER_PAGE_COUNT = 30
 
   # Override class method
   def validators
-    Rails.logger.warn("Custom validators called!")
     @validators ||= begin
                       int = lambda { |x| Integer === x || (String === x && x.match?(/\A-?[0-9]+\z/)) }
                       zero_up_to_max_int = lambda { |x| int.call(x) && x.to_i.between?(0, PG_MAX_INT) }
