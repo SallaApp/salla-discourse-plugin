@@ -4,7 +4,8 @@ TopicListItemSerializer.class_eval do
   attributes :category,
              :topic_creator,
              :cooked,
-             :first_post_details
+             :first_post_details,
+						 :category_topic
 	def category
     {
       id: category_id,
@@ -35,7 +36,11 @@ TopicListItemSerializer.class_eval do
       is_post_liked: is_post_liked?,
       is_post_bookmarked: is_post_bookmarked?
     }
-  end
+	end
+
+	def category_topic
+		object.is_category_topic?
+	end
 
 	private
 
