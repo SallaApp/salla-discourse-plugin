@@ -4,7 +4,8 @@ SuggestedTopicSerializer.class_eval do
   attributes :cooked,
              :category,
              :topic_creator,
-             :first_post_details
+             :first_post_details,
+             :category_topic
 
 	 def cooked
     object&.first_post&.cooked
@@ -36,6 +37,10 @@ SuggestedTopicSerializer.class_eval do
       is_post_liked: is_post_liked?,
       is_post_bookmarked: is_post_bookmarked?
     }
+  end
+
+  def category_topic
+    object.is_category_topic?
   end
 
   private
