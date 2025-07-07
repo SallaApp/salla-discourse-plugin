@@ -17,7 +17,7 @@ module TopicQueryPatch
           self,
           )
       return new_result if !new_result.nil? && new_result != result
-      sort_column = SORTABLE_MAPPING[order_option] || "default"
+      sort_column = ::TopicQuery::SORTABLE_MAPPING[order_option] || "default"
 
       # If we are sorting in the default order desc, we should consider including pinned
       # topics. Otherwise, just use bumped_at.
