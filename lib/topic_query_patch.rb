@@ -1,65 +1,80 @@
 module TopicQueryPatch
   # Override instance method
   def apply_ordering(result, options = {})
-    order_options = Array(options[:order])
+    order_option = options[:order]
     sort_dir = (options[:ascending] == "true") ? "ASC" : "DESC"
 
-    return result if order_options.empty?
-
-    order_clauses = order_options.map do |order_option|
-      new_result =
-        DiscoursePluginRegistry.apply_modifier(
-          :topic_query_apply_ordering_result,
-          result,
-          order_option,
-          sort_dir,
-          options,
-          self,
-          )
-      return new_result if !new_result.nil? && new_result != result
-      sort_column = ::TopicQuery::SORTABLE_MAPPING[order_option] || "default"
-
-      # If we are sorting in the default order desc, we should consider including pinned
-      # topics. Otherwise, just use bumped_at.
-      if sort_column == "default"
-        if sort_dir == "DESC"
-          # If something requires a custom order, for example "unread" which sorts the least read
-          # to the top, do nothing
-          return result if options[:unordered]
+    # If order_option is an array, apply chained ordering
+    if order_option.is_a?(Array)
+      order_clauses = order_option.map do |order_field|
+        sort_column = ::TopicQuery::SORTABLE_MAPPING[order_field] || "default"
+        if sort_column == "default"
+          sort_column = "bumped_at"
         end
-        sort_column = "bumped_at"
+        if sort_column == "category_id"
+          "CASE WHEN categories.id = #{SiteSetting.uncategorized_category_id.to_i} THEN '' ELSE categories.name END #{sort_dir}"
+        elsif sort_column == "op_likes"
+          "(SELECT like_count FROM posts p3 WHERE p3.topic_id = topics.id AND p3.post_number = 1) #{sort_dir}"
+        elsif sort_column.start_with?("custom_fields")
+          field = sort_column.split(".")[1]
+          "(SELECT CASE WHEN EXISTS (SELECT true FROM topic_custom_fields tcf WHERE tcf.topic_id::integer = topics.id::integer AND tcf.name = '#{field}') THEN (SELECT value::integer FROM topic_custom_fields tcf WHERE tcf.topic_id::integer = topics.id::integer AND tcf.name = '#{field}') ELSE 0 END) #{sort_dir}"
+        else
+          "topics.#{sort_column} #{sort_dir}"
+        end
       end
+      return result.order(order_clauses.join(", "))
+    end
 
-      # Generate the appropriate ORDER BY clause based on the sort column
-      if sort_column == "category_id"
-        # TODO forces a table scan, slow
-        "CASE WHEN categories.id = #{SiteSetting.uncategorized_category_id.to_i} THEN '' ELSE categories.name END #{sort_dir}"
-      elsif sort_column == "op_likes"
-        "(SELECT like_count FROM posts p3 WHERE p3.topic_id = topics.id AND p3.post_number = 1) #{sort_dir}"
-      elsif sort_column.start_with?("custom_fields")
-        field = sort_column.split(".")[1]
-        "(SELECT CASE WHEN EXISTS (SELECT true FROM topic_custom_fields tcf WHERE tcf.topic_id::integer = topics.id::integer AND tcf.name = '#{field}') THEN (SELECT value::integer FROM topic_custom_fields tcf WHERE tcf.topic_id::integer = topics.id::integer AND tcf.name = '#{field}') ELSE 0 END) #{sort_dir}"
-      else
-        "topics.#{sort_column} #{sort_dir}"
+    new_result = DiscoursePluginRegistry.apply_modifier(
+      :topic_query_apply_ordering_result,
+      result,
+      order_option,
+      sort_dir,
+      options,
+      self,
+      )
+    return new_result if !new_result.nil? && new_result != result
+    sort_column = ::TopicQuery::SORTABLE_MAPPING[order_option] || "default"
+
+    # If we are sorting in the default order desc, we should consider including pinned topics. Otherwise, just use bumped_at.
+    if sort_column == "default"
+      if sort_dir == "DESC"
+        # If something requires a custom order, for example "unread" which sorts the least read to the top, do nothing
+        return result if options[:unordered]
       end
+      sort_column = "bumped_at"
     end
 
-    # Apply all order clauses
-    if order_clauses.any? { |clause| clause.include?("categories.name") }
-      result = result.references(:categories)
-    end
-    if order_clauses.any? { |clause| clause.include?("posts p3") }
-      result = result.includes(:first_post)
+    # If we are sorting by category, actually use the name
+    if sort_column == "category_id"
+      # TODO forces a table scan, slow
+      return result.references(:categories).order(<<~SQL)
+        CASE WHEN categories.id = #{SiteSetting.uncategorized_category_id.to_i} THEN '' ELSE categories.name END #{sort_dir}
+      SQL
     end
 
-    result.order(order_clauses.join(", "))
+    if sort_column == "op_likes"
+      return result.includes(:first_post).order(
+        "(SELECT like_count FROM posts p3 WHERE p3.topic_id = topics.id AND p3.post_number = 1) #{sort_dir}",
+        )
+    end
+
+    if sort_column.start_with?("custom_fields")
+      field = sort_column.split(".")[1]
+      return result.order(
+        "(SELECT CASE WHEN EXISTS (SELECT true FROM topic_custom_fields tcf WHERE tcf.topic_id::integer = topics.id::integer AND tcf.name = '#{field}') THEN (SELECT value::integer FROM topic_custom_fields tcf WHERE tcf.topic_id::integer = topics.id::integer AND tcf.name = '#{field}') ELSE 0 END) #{sort_dir}",
+        )
+    end
+
+    result.order("topics.#{sort_column} #{sort_dir}")
   end
 end
 
 module TopicQueryClassPatch
-  PG_MAX_INT = 2_147_483_647
-
   # Override class method
+  PG_MAX_INT = 2_147_483_647
+  DEFAULT_PER_PAGE_COUNT = 30
+
   def validators
     @validators ||= begin
                       int = lambda { |x| Integer === x || (String === x && x.match?(/\A-?[0-9]+\z/)) }
@@ -76,7 +91,7 @@ module TopicQueryClassPatch
                         bumped_before: zero_up_to_max_int,
                         topic_ids: array_or_string,
                         category: string,
-                        order: lambda { |x| String === x || Array === x },
+                        order: array_or_string,
                         ascending: true_or_false,
                         min_posts: zero_up_to_max_int,
                         max_posts: zero_up_to_max_int,
