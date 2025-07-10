@@ -7,7 +7,8 @@ PostSerializer.class_eval do
              :like_count,
              :posts_count,
              :last_posted_at,
-             :first_post_details
+             :first_post_details,
+             :archetype
 
 	def category
 		topic = object.topic
@@ -27,6 +28,10 @@ PostSerializer.class_eval do
       name: object.user&.name,
       avatar: object.user&.avatar_template
     }
+  end
+
+  def archetype
+    object.topic&.archetype
   end
 
   def views
