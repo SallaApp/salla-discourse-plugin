@@ -73,4 +73,8 @@ after_initialize do
 
   require_relative "lib/salla_serializers/omniauth_callbacks_controller_patch"
   ::Users::OmniauthCallbacksController.prepend SallaSerializers::OmniauthCallbacksControllerPatch
+
+  # Register new 'featured' archetype
+  Archetype::FEATURED = 'featured'
+  Archetype.register(Archetype::FEATURED)
 end
